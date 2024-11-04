@@ -2,24 +2,21 @@
   <div>
     <div class="header flex justify-between items-center p-4 bg-dark text-light">
       <button @click="toggleSidebar" class="px-4 py-2 bg-indigo-500 text-white rounded">Toggle Sidebar</button>
-      <div class="text-lg font-bold">
-        Welcome, {{ username || 'Guest' }}
+      <div class="flex items-center space-x-4">
+        <span class="text-lg font-bold">Welcome, {{ username || 'Guest' }}</span>
+        <button @click="logout" class="px-4 py-2 bg-red-500 text-white rounded">Logout</button>
       </div>
     </div>
 
     <div :class="['sidebar', { 'hidden': !isSidebarVisible }]" class="fixed inset-y-0 left-0 w-64 bg-gray-800 text-white p-4 transition-transform duration-300 transform">
-      <!-- Sidebar content here -->
       <h2 class="text-xl font-bold">Sidebar</h2>
       <ul>
-        <ul>
-          <li><router-link to="/view-paper">View Papers</router-link></li>
-          <li><router-link to="/submit-paper">Submit Papers</router-link></li>
-        </ul>
+        <li><router-link to="/view-paper">View Papers</router-link></li>
+        <li><router-link to="/submit-paper">Submit Papers</router-link></li>
       </ul>
     </div>
 
     <div class="main-content ml-64 p-4">
-      <!-- Main content here -->
       <router-view />
     </div>
   </div>
@@ -37,6 +34,12 @@ export default {
   methods: {
     toggleSidebar() {
       this.isSidebarVisible = !this.isSidebarVisible;
+    },
+    logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('username'); 
+
+      this.$router.push('/login');
     },
   },
 };
