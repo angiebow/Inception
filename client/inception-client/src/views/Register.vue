@@ -32,8 +32,6 @@
 </template>
 
 <script>
-import axios from 'axios';
-
 export default {
   name: 'UserRegister',
   data() {
@@ -47,20 +45,39 @@ export default {
   methods: {
     async register() {
       try {
-        const response = await axios.post('http://localhost:5001/api/users/register', {
-          username: this.username,
-          email: this.email,
-          password: this.password,
+        const response = await fetch('http://localhost:5001/api/users/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            username: this.username,
+            email: this.email,
+            password: this.password,
+          }),
         });
-        console.log(response.data);
-        this.$router.push('/login');
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          this.error = errorData.message || 'Registration failed. Please try again.';
+        } else {
+          const data = await response.json();
+          console.log('Registration successful:', data);
+          this.$router.push('/login');
+        }
       } catch (error) {
-        console.error('Registration error:', error); 
-        this.error = error.response && error.response.data && error.response.data.message
-          ? error.response.data.message
-          : 'Registration failed. Please try again.';
+        console.error('Registration error:', error);
+        this.error = 'Network error. Please try again.';
       }
     },
-  }
+  },
 };
 </script>
+
+<style scoped>
+.apod-image {
+  max-width: 100%;
+  height: auto;
+  margin-top: 1rem;
+}
+</style>

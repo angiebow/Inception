@@ -42,17 +42,26 @@ export default {
         const response = await axios.post('http://localhost:5001/api/users/login', {
           email: this.email,
           password: this.password,
+        }, {
+          withCredentials: true // Ensures cookies or tokens are sent and received
         });
-        const token = response.data.token;
-        localStorage.setItem('token', token); 
-        this.$router.push('/'); 
+        console.log('Login successful:', response.data);
+        // Clear any previous error
+        this.error = null;
+        // Redirect to the home page or dashboard after successful login
+        this.$router.push('/home');
       } catch (error) {
         console.error('Login error:', error);
+        // Improved error handling: check if there’s a server response
         this.error = error.response && error.response.data && error.response.data.message
           ? error.response.data.message
           : 'Login failed. Please try again.';
       }
-    },
-  },
+    }
+  }
 };
 </script>
+
+<style scoped>
+/* Additional styling for the component */
+</style>

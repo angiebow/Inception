@@ -1,28 +1,27 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import Login from '../views/Login.vue';
-import Register from '../views/Register.vue';
-import Dashboard from '../views/Dashboard.vue';
-import Home from '../views/Home.vue'; // Import Home component
+import HomePage from '@/views/HomePage.vue'; // Confirm this path
+import ViewPapers from '@/views/ViewPapers.vue'; // Confirm this path
+import SubmitPapers from '@/views/SubmitPapers.vue'; // Confirm this path
 
 const routes = [
-  { path: '/', component: Home }, // Set Home as the default route
-  { path: '/login', component: Login },
-  { path: '/register', component: Register },
-  { path: '/dashboard', component: Dashboard },
+  {
+    path: '/',
+    component: HomePage,
+  },
+  {
+    path: '/view-paper',
+    component: ViewPapers,
+  },
+  {
+    path: '/submit-paper',
+    component: SubmitPapers,
+  },
+  // other routes
 ];
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes,
-});
-
-router.beforeEach((to, from, next) => {
-  const isAuthenticated = !!localStorage.getItem('token'); // Check if token exists
-  if (to.path === '/' && !isAuthenticated) {
-    next('/login'); // Redirect to login if not authenticated
-  } else {
-    next(); // Proceed to the route
-  }
 });
 
 export default router;
