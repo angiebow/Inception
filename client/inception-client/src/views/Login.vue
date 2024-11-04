@@ -45,11 +45,15 @@ export default {
         }, {
           withCredentials: true // Ensures cookies or tokens are sent and received
         });
+        localStorage.setItem(
+            "username",
+            JSON.stringify(response.data.username)
+          );
         console.log('Login successful:', response.data);
         // Clear any previous error
         this.error = null;
         // Redirect to the home page or dashboard after successful login
-        this.$router.push('/dashboard');
+        this.$router.push('/');
       } catch (error) {
         console.error('Login error:', error);
         // Improved error handling: check if there’s a server response

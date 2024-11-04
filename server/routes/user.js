@@ -30,7 +30,7 @@ router.post('/login', async (req, res) => {
         if (!isMatch) return res.status(400).json({ message: 'Invalid password' });
 
         const token = jwt.sign({ userId: user._id }, process.env.TOKEN_SECRET, { expiresIn: '1h' });
-        res.json({ message: 'Login successful', token });
+        res.json({ message: 'Login successful', token, username: user.username });
     } catch (error) {
         res.status(500).json({ message: 'Error logging in', error });
     }
