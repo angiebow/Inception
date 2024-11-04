@@ -51,7 +51,10 @@ export default {
       formData.append('title', this.title);
       formData.append('description', this.description);
       formData.append('file', this.file);
-
+      console.log('FormData contents:');
+      for (let pair of formData.entries()) {
+        console.log(pair[0] + ':', pair[1]);
+      }
       try {
         const response = await fetch('http://localhost:5001/api/papers/upload', {
           method: 'POST',
@@ -63,7 +66,7 @@ export default {
           this.error = errorData.message || 'Submission failed. Please try again.';
           this.success = null;
         } else {
-          const data = await response.json();
+          //const data = await response.json();
           this.success = 'Paper submitted successfully!';
           this.error = null;
         }

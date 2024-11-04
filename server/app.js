@@ -16,7 +16,7 @@ app.use(cors({
 
 const userRoutes = require('./routes/user');
 const researchRoutes = require('./routes/research');
-const paperRoutes = require('./routes/papers'); 
+const paperRoutes = require('./routes/paper'); 
 
 app.use('/api/users', userRoutes);
 app.use('/api/research', researchRoutes);
