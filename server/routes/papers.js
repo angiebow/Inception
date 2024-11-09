@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const Paper = require('../models/Paper');
+const path = require('path');
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -25,7 +26,7 @@ router.post('/upload', upload.single('file'), async (req, res) => {
       yearOfPublishing,
       institution,
       citationRate,
-      filePath: req.file.path, 
+      fileUrl: 'http://localhost:5001/' + req.file.path, 
     });
 
     await newPaper.save();
