@@ -25,12 +25,12 @@
               <li v-for="comment in comments[paper._id]" :key="comment._id" class="mb-4 p-4 bg-gray-800 rounded-lg">
                 <p class="text-sm text-gray-400">{{ comment.authorName }} {{ new Date(comment.createdAt).toLocaleDateString() }}</p>
                 <p class="mt-2">{{ comment.content }}</p>
-                <button v-if="comment.authorId === currentUserId" class="ml-2" @click="deleteComment(comment._id, paper._id)">Delete</button>
+                <button v-if="comment.authorId === currentUserId" class="ml-2 inline-block bg-nebula text-white-900 font-semibold rounded hover:bg-indigo-700 transition duration-300 transform hover:scale-105" @click="deleteComment(comment._id, paper._id)">Delete</button>
               </li>
             </ul>
           </div>
             <div class="mt-4">
-              <form @submit.prevent="submitComment(paper._id)">
+              <form @submit.prevent="submitComment(paper._id, paper.authorId, paper.title)">
                 <textarea v-model="newComment[paper._id]" placeholder="Write your comment here" class="w-full p-2 bg-transparent border border-nebula rounded focus:outline-none text-star placeholder-opacity-50" rows="1" required></textarea>
                 <button type="submit" class="mt-2 inline-block bg-nebula text-white-900 font-semibold rounded hover:bg-indigo-700 transition duration-300 transform hover:scale-105">Submit Comment</button>
               </form>
@@ -71,7 +71,7 @@ export default {
           });
           if (response.ok) {
             const data = await response.json();
-            console.log(data.message + ' ' + data.userId);
+            //console.log(data.message + ' ' + data.userId);
             this.currentUserId = data.userId;
             return;
           } else {
@@ -88,12 +88,34 @@ export default {
       this.currentUsername = username;
       return;
     },
+    async addNotification(authorId, paperTitle, comment) {
+      try {
+        //this.currentUserId = await this.getCurrentUser();
+        //  console.log(this.currentUserId);
+        //  console.log(this.currentUsername);
+        //  console.log(inPaperId);
+        //  console.log(this.newComment[inPaperId]);
+        const response = await fetch('http://localhost:5001/api/notifications/upload', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId: authorId,
+            message: this.currentUsername + ' Commented on your paper: "' + paperTitle + '" Comment: ' + comment,
+          }),
+        });
+        console.log(response);
+      } catch (error) {
+        console.error('Error submitting comment:', error);
+      }
+    },
     async viewComments(inPaperId) {
       try {
         const response = await fetch(`http://localhost:5001/api/comments/${inPaperId}`);
         this.comments[inPaperId] = await response.json();
         this.showComments[inPaperId] = true;
-        console.log(this.comments[inPaperId]);
+        //console.log(this.comments[inPaperId]);
       } catch (error) {
         console.error('Error fetching comments:', error);
       }
@@ -101,13 +123,13 @@ export default {
     async hideComments(inPaperId) {
       this.showComments[inPaperId] = false;
     },
-    async submitComment(inPaperId) {
+    async submitComment(inPaperId, authorId, paperTitle) {
       try {
         //this.currentUserId = await this.getCurrentUser();
-         console.log(this.currentUserId);
-         console.log(this.currentUsername);
-         console.log(inPaperId);
-         console.log(this.newComment[inPaperId]);
+        //  console.log(this.currentUserId);
+        //  console.log(this.currentUsername);
+        //  console.log(inPaperId);
+        //  console.log(this.newComment[inPaperId]);
         const response = await fetch('http://localhost:5001/api/comments/upload', {
           method: 'POST',
           headers: {
@@ -121,7 +143,8 @@ export default {
           }),
         });
         console.log(response);
-        alert('Comment added successfully');
+        //alert('Comment added successfully');
+        this.addNotification(authorId, paperTitle, this.newComment[inPaperId]);
         this.newComment[inPaperId] = '';
         this.viewComments(inPaperId);
       } catch (error) {
