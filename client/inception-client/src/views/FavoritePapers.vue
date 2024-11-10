@@ -14,6 +14,7 @@
 
 <script>
 export default {
+    name: 'FavoritePapers',
   data() {
       return {
           favorites: [],
