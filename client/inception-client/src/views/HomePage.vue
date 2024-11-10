@@ -13,6 +13,7 @@
       <ul>
         <li><router-link to="/view-paper">View Papers</router-link></li>
         <li><router-link to="/submit-paper">Submit Papers</router-link></li>
+        <router-link to="/favorites">My Favorites</router-link>
       </ul>
     </div>
 

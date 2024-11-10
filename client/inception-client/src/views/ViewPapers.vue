@@ -2,7 +2,8 @@
   <div class="max-w-3xl mx-auto mt-20 p-8 bg-gray-900 bg-opacity-75 rounded-lg shadow-lg text-star">
     <h2 class="text-3xl font-bold mb-4 text-nebula">Submitted Papers</h2>
 
-]    <div class="mb-4">
+    <!-- Search Input -->
+    <div class="mb-4">
       <input
         v-model="searchTerm"
         @input="scrollToFirstMatch"
@@ -24,9 +25,14 @@
           <a :href="paper.fileUrl" target="_blank" class="mt-2 inline-block text-indigo-400 hover:text-indigo-600">
             View Paper
           </a>
+          <button @click="addToFavorites(paper._id)" class="mt-2 inline-block bg-nebula text-white-900 font-semibold rounded hover:bg-indigo-700 transition duration-300 transform hover:scale-105">
+            Add to Favorites
+          </button>
           <button @click="viewComments(paper._id)" class="mt-2 inline-block bg-nebula text-white-900 font-semibold rounded hover:bg-indigo-700 transition duration-300 transform hover:scale-105">
             View Comments
           </button>
+          
+          <!-- Display Comments -->
           <div v-if="comments[paper._id]">
             <h3 class="text-2xl font-semibold text-nebula">Reviews</h3>
             <ul>
@@ -36,6 +42,8 @@
               </li>
             </ul>
           </div>
+
+          <!-- Comment Form -->
           <div class="mt-4">
             <form @submit.prevent="submitComment(paper._id)">
               <textarea v-model="newComment[paper._id]" placeholder="Write your comment here" class="w-full p-2 bg-transparent border border-nebula rounded focus:outline-none text-star placeholder-opacity-50" rows="1" required></textarea>
@@ -75,6 +83,34 @@ export default {
     },
   },
   methods: {
+    async addToFavorites(paperId) {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('Please log in to add to favorites');
+        return;
+      }
+
+      try {
+        const response = await fetch('http://localhost:5001/api/favorites/add', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ paperId }), 
+        });
+
+        if (response.ok) {
+          alert('Added to favorites successfully');
+        } else {
+          const errorData = await response.json();
+          alert(errorData.message || 'Failed to add to favorites');
+        }
+      } catch (error) {
+        console.error('Error adding to favorites:', error);
+        alert('Network error. Please try again.');
+      }
+    },
     highlightText(text) {
       if (!this.searchTerm) return text;
       const regex = new RegExp(`(${this.searchTerm})`, 'gi');
