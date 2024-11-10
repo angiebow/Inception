@@ -1,37 +1,21 @@
+// client/src/router/index.js
 import { createRouter, createWebHistory } from 'vue-router';
-import HomePage from '@/views/HomePage.vue'; // Confirm this path
-import ViewPapers from '@/views/ViewPapers.vue'; // Confirm this path
-import SubmitPapers from '@/views/SubmitPapers.vue'; // Confirm this path
-import Login from '@/views/Login.vue'; // Confirm this path
-import Register from '@/views/Register.vue'; // Confirm this path
+import HomePage from '@/views/HomePage.vue';
+import ViewPapers from '@/views/ViewPapers.vue';
+import SubmitPapers from '@/views/SubmitPapers.vue';
+import Favorites from '@/views/Favorites.vue';
+import Login from '@/views/Login.vue';
+import Register from '@/views/Register.vue';
 import Dashboard from '@/views/Dashboard.vue';
 
 const routes = [
-  {
-    path: '/',
-    component: HomePage,
-  },
-  {
-    path: '/view-paper',
-    component: ViewPapers,
-  },
-  {
-    path: '/submit-paper',
-    component: SubmitPapers,
-  },
-  {
-    path: '/login',
-    component: Login,
-  },
-  {
-    path: '/register',
-    component: Register,
-  },
-  {
-    path: '/dashboard',
-    component: Dashboard,
-  }
-  // other routes
+  { path: '/', component: HomePage },
+  { path: '/view-paper', component: ViewPapers },
+  { path: '/submit-paper', component: SubmitPapers },
+  { path: '/favorites', component: Favorites },
+  { path: '/login', component: Login },
+  { path: '/register', component: Register },
+  { path: '/dashboard', component: Dashboard },
 ];
 
 const router = createRouter({
