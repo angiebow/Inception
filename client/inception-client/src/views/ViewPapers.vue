@@ -13,24 +13,24 @@
           <a :href="paper.fileUrl" target="_blank" class="mt-2 inline-block text-indigo-400 hover:text-indigo-600">
             View Paper
           </a>
-          <div v-if="comments.length === 0">
-            No comments
-          </div>
-          <div v-else>
+          <button @click="viewComments(paper._id)" class="mt-2 inline-block bg-nebula text-white-900 font-semibold rounded hover:bg-indigo-700 transition duration-300 transform hover:scale-105">
+            View Comments
+          </button>
+          <div v-if="comments">
             <h3 class="text-2xl font-semibold text-nebula">Reviews</h3>
             <ul>
-              <li v-for="comment in comments" :key="comment._id" class="mb-4 p-4 bg-gray-800 rounded-lg">
-                <p class="text-sm text-gray-400">{{ comment.author.username }} Submitted on {{ new Date(comment.createdAt).toLocaleDateString() }}</p>
+              <li v-for="comment in comments[paper._id]" :key="comment._id" class="mb-4 p-4 bg-gray-800 rounded-lg">
+                <p class="text-sm text-gray-400">{{ comment.authorId }} Submitted on {{ new Date(comment.createdAt).toLocaleDateString() }}</p>
                 <p class="mt-2">{{ comment.content }}</p>
               </li>
             </ul>
           </div>
-          <div class="mt-4">
-            <form @submit.prevent="submitComment(paper._id)">
-              <textarea v-model="newComment[paper._id]" placeholder="Write your comment here" class="w-full p-2 bg-transparent border border-nebula rounded focus:outline-none text-star placeholder-opacity-50" rows="1" required></textarea>
-              <button type="submit" class="mt-2 inline-block bg-nebula text-white-900 font-semibold rounded hover:bg-indigo-700 transition duration-300 transform hover:scale-105">Submit Comment</button>
-            </form>
-          </div>
+            <div class="mt-4">
+              <form @submit.prevent="submitComment(paper._id)">
+                <textarea v-model="newComment[paper._id]" placeholder="Write your comment here" class="w-full p-2 bg-transparent border border-nebula rounded focus:outline-none text-star placeholder-opacity-50" rows="1" required></textarea>
+                <button type="submit" class="mt-2 inline-block bg-nebula text-white-900 font-semibold rounded hover:bg-indigo-700 transition duration-300 transform hover:scale-105">Submit Comment</button>
+              </form>
+            </div>
         </li>
       </ul>
     </div>
@@ -49,12 +49,13 @@ export default {
       error: null,
       showForm: false,
       newComment: {},
+      currentUserId: '',
     };
   },
   methods: {
     async getCurrentUser() {
       const token = localStorage.getItem('token');
-      console.log(token);
+      //console.log(token);
       if (!token) return null;
       try {
           const response = await fetch('http://localhost:5001/api/users/me', {
@@ -75,9 +76,19 @@ export default {
           return null;
       }
     },
+    async viewComments(inPaperId) {
+      try {
+        const response = await fetch(`http://localhost:5001/api/comments/${inPaperId}`);
+        this.comments[inPaperId] = await response.json();
+        console.log(this.comments[inPaperId]);
+      } catch (error) {
+        console.error('Error fetching comments:', error);
+      }
+    },
     async submitComment(inPaperId) {
       try {
-        console.log(this.getCurrentUser());
+        this.currentUserId = await this.getCurrentUser();
+        console.log(this.currentUserId);
         console.log(inPaperId);
         console.log(this.newComment[inPaperId]);
         const response = await fetch('http://localhost:5001/api/comments/upload', {
@@ -86,15 +97,15 @@ export default {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            authorId: this.getCurrentUser(),
+            authorId: this.currentUserId,
             paperId: inPaperId,
             content: this.newComment[inPaperId],
           }),
         });
-        console.log(response.data.message);
+        console.log(response);
         alert('Comment added successfully');
-        this.newComment = '';
-        this.fetchComments();
+        this.newComment[inPaperId] = '';
+        this.viewComments(inPaperId);
       } catch (error) {
         console.error('Error submitting comment:', error);
       }
@@ -114,14 +125,6 @@ export default {
       this.error = 'Network error. Please try again.';
     }
   },
-  async fetchComments() {
-      try {
-        const response = await fetch(`http://localhost:5001/api/comments/${this.paperId}`);
-        this.comments = await response.data;
-      } catch (error) {
-        console.error('Error fetching comments:', error);
-      }
-    },
 };
 </script>
 

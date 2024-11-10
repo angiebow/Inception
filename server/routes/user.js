@@ -53,7 +53,7 @@ router.use((req, res, next) => {
     
     try {
         const decoded = jwt.verify(token, "OjeICoYoBSWHn4gaq7tTBfmV1nKLiYxH");
-        req.userId = decoded.id; // Assuming the token payload has an `id` field
+        req.userId = decoded.userId; // Assuming the token payload has an `id` field
         next();
     } catch (err) {
         res.status(400).json({ message: "Invalid Token" });
