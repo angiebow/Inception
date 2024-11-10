@@ -13,6 +13,24 @@
           <a :href="paper.fileUrl" target="_blank" class="mt-2 inline-block text-indigo-400 hover:text-indigo-600">
             View Paper
           </a>
+          <div v-if="comments.length === 0">
+            No comments
+          </div>
+          <div v-else>
+            <h3 class="text-2xl font-semibold text-nebula">Reviews</h3>
+            <ul>
+              <li v-for="comment in comments" :key="comment._id" class="mb-4 p-4 bg-gray-800 rounded-lg">
+                <p class="text-sm text-gray-400">{{ comment.author.username }} Submitted on {{ new Date(comment.createdAt).toLocaleDateString() }}</p>
+                <p class="mt-2">{{ comment.content }}</p>
+              </li>
+            </ul>
+          </div>
+          <div class="mt-4">
+            <form @submit.prevent="submitComment(paper._id)">
+              <textarea v-model="newComment[paper._id]" placeholder="Write your comment here" class="w-full p-2 bg-transparent border border-nebula rounded focus:outline-none text-star placeholder-opacity-50" rows="1" required></textarea>
+              <button type="submit" class="mt-2 inline-block bg-nebula text-white-900 font-semibold rounded hover:bg-indigo-700 transition duration-300 transform hover:scale-105">Submit Comment</button>
+            </form>
+          </div>
         </li>
       </ul>
     </div>
@@ -23,11 +41,64 @@
 <script>
 export default {
   name: 'ViewPapers',
+  props: ['paperId'],
   data() {
     return {
       papers: [],
+      comments: [],
       error: null,
+      showForm: false,
+      newComment: {},
     };
+  },
+  methods: {
+    async getCurrentUser() {
+      const token = localStorage.getItem('token');
+      console.log(token);
+      if (!token) return null;
+      try {
+          const response = await fetch('http://localhost:5001/api/users/me', {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          if (response.ok) {
+            const data = await response.json();
+            console.log(data.message + ' ' + data.userId);
+            return data.userId;
+          } else {
+            console.error('Failed to get user ID:', response.statusText);
+            return null;
+          }
+      } catch (error) {
+          console.error('Failed to get user ID:', error);
+          return null;
+      }
+    },
+    async submitComment(inPaperId) {
+      try {
+        console.log(this.getCurrentUser());
+        console.log(inPaperId);
+        console.log(this.newComment[inPaperId]);
+        const response = await fetch('http://localhost:5001/api/comments/upload', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            authorId: this.getCurrentUser(),
+            paperId: inPaperId,
+            content: this.newComment[inPaperId],
+          }),
+        });
+        console.log(response.data.message);
+        alert('Comment added successfully');
+        this.newComment = '';
+        this.fetchComments();
+      } catch (error) {
+        console.error('Error submitting comment:', error);
+      }
+    },
   },
   async mounted() {
     try {
@@ -43,6 +114,14 @@ export default {
       this.error = 'Network error. Please try again.';
     }
   },
+  async fetchComments() {
+      try {
+        const response = await fetch(`http://localhost:5001/api/comments/${this.paperId}`);
+        this.comments = await response.data;
+      } catch (error) {
+        console.error('Error fetching comments:', error);
+      }
+    },
 };
 </script>
 

@@ -36,4 +36,32 @@ router.post('/login', async (req, res) => {
     }
 });
 
+// const authenticateToken = (req, res, next) => {
+//     const token = req.headers['authorization']?.split(' ')[1]; // Bearer <token>
+//     if (!token) return res.sendStatus(401).json({ message: 'Unauthorized' });
+
+//     jwt.verify(token, 'OjeICoYoBSWHn4gaq7tTBfmV1nKLiYxH', (err, decoded) => {
+//         if (err) return res.sendStatus(403).json({ message: 'Forbidden' });
+//         req.userId = decoded.id; // Attach the user ID to the request
+//         next();
+//     });
+// };
+
+router.use((req, res, next) => {
+    const token = req.headers.authorization?.split(" ")[1]; // Extract token from header
+    if (!token) return res.status(401).json({ message: "Access Denied" });
+    
+    try {
+        const decoded = jwt.verify(token, "OjeICoYoBSWHn4gaq7tTBfmV1nKLiYxH");
+        req.userId = decoded.id; // Assuming the token payload has an `id` field
+        next();
+    } catch (err) {
+        res.status(400).json({ message: "Invalid Token" });
+    }
+});
+
+router.get('/me', (req, res) => {
+    res.json({ message: 'User details', userId: req.userId});
+});
+
 module.exports = router; 

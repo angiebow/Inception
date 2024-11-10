@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const Paper = require('../models/Paper');
-const path = require('path');
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
