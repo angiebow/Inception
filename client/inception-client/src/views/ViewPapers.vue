@@ -13,15 +13,19 @@
           <a :href="paper.fileUrl" target="_blank" class="mt-2 inline-block text-indigo-400 hover:text-indigo-600">
             View Paper
           </a>
-          <button @click="viewComments(paper._id)" class="mt-2 inline-block bg-nebula text-white-900 font-semibold rounded hover:bg-indigo-700 transition duration-300 transform hover:scale-105">
+          <button v-if="!showComments[paper._id]" @click="viewComments(paper._id)" class="ml-2 inline-block bg-nebula text-white-900 font-semibold rounded hover:bg-indigo-700 transition duration-300 transform hover:scale-105">
             View Comments
           </button>
-          <div v-if="comments">
-            <h3 class="text-2xl font-semibold text-nebula">Reviews</h3>
+          <button v-if="comments[paper._id] && showComments[paper._id]" @click="hideComments(paper._id)" class="ml-2 inline-block bg-nebula text-white-900 font-semibold rounded hover:bg-indigo-700 transition duration-300 transform hover:scale-105">
+            Hide Comments
+          </button>
+          <div v-if="comments[paper._id] && showComments[paper._id]">
+            <h4 class="mt-4 text-xl font-semibold text-nebula">Comments</h4>
             <ul>
               <li v-for="comment in comments[paper._id]" :key="comment._id" class="mb-4 p-4 bg-gray-800 rounded-lg">
-                <p class="text-sm text-gray-400">{{ comment.authorId }} Submitted on {{ new Date(comment.createdAt).toLocaleDateString() }}</p>
+                <p class="text-sm text-gray-400">{{ comment.authorName }} {{ new Date(comment.createdAt).toLocaleDateString() }}</p>
                 <p class="mt-2">{{ comment.content }}</p>
+                <button v-if="comment.authorId === currentUserId" class="ml-2" @click="deleteComment(comment._id, paper._id)">Delete</button>
               </li>
             </ul>
           </div>
@@ -50,6 +54,8 @@ export default {
       showForm: false,
       newComment: {},
       currentUserId: '',
+      currentUsername: '',
+      showComments: [],
     };
   },
   methods: {
@@ -66,31 +72,42 @@ export default {
           if (response.ok) {
             const data = await response.json();
             console.log(data.message + ' ' + data.userId);
-            return data.userId;
+            this.currentUserId = data.userId;
+            return;
           } else {
-            console.error('Failed to get user ID:', response.statusText);
-            return null;
+              console.error('Failed to get user ID:', response.statusText);
+              return null;
           }
       } catch (error) {
           console.error('Failed to get user ID:', error);
           return null;
       }
     },
+    async getCurrentUsername() {
+      const username = localStorage.getItem('username');
+      this.currentUsername = username;
+      return;
+    },
     async viewComments(inPaperId) {
       try {
         const response = await fetch(`http://localhost:5001/api/comments/${inPaperId}`);
         this.comments[inPaperId] = await response.json();
+        this.showComments[inPaperId] = true;
         console.log(this.comments[inPaperId]);
       } catch (error) {
         console.error('Error fetching comments:', error);
       }
     },
+    async hideComments(inPaperId) {
+      this.showComments[inPaperId] = false;
+    },
     async submitComment(inPaperId) {
       try {
-        this.currentUserId = await this.getCurrentUser();
-        console.log(this.currentUserId);
-        console.log(inPaperId);
-        console.log(this.newComment[inPaperId]);
+        //this.currentUserId = await this.getCurrentUser();
+         console.log(this.currentUserId);
+         console.log(this.currentUsername);
+         console.log(inPaperId);
+         console.log(this.newComment[inPaperId]);
         const response = await fetch('http://localhost:5001/api/comments/upload', {
           method: 'POST',
           headers: {
@@ -98,6 +115,7 @@ export default {
           },
           body: JSON.stringify({
             authorId: this.currentUserId,
+            authorName: this.currentUsername,
             paperId: inPaperId,
             content: this.newComment[inPaperId],
           }),
@@ -110,6 +128,18 @@ export default {
         console.error('Error submitting comment:', error);
       }
     },
+    async deleteComment(commentId, inPaperId) {
+      try {
+        await fetch(`http://localhost:5001/api/comments/${commentId}`, {
+          method: 'DELETE',
+        });
+        
+        // Remove the deleted comment from the local comments array
+        this.comments[inPaperId] = this.comments[inPaperId].filter(comment => comment._id !== commentId);
+      } catch (error) {
+        console.error('Error deleting comment:', error);
+      }
+    },
   },
   async mounted() {
     try {
@@ -120,6 +150,8 @@ export default {
         return;
       }
       this.papers = await response.json();
+      this.getCurrentUser();
+      this.getCurrentUsername();
     } catch (error) {
       console.error('Error fetching papers:', error);
       this.error = 'Network error. Please try again.';
