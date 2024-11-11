@@ -41,8 +41,32 @@ export default {
     handleFileUpload(event) {
       this.file = event.target.files[0];
     },
+    async getCurrentUser() {
+      const token = localStorage.getItem('token');
+      //console.log(token);
+      if (!token) return null;
+      try {
+          const response = await fetch('http://localhost:5001/api/users/me', {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          if (response.ok) {
+            const data = await response.json();
+            //console.log(data.message + ' ' + data.userId);
+            return data.userId;
+          } else {
+              console.error('Failed to get user ID:', response.statusText);
+              return null;
+          }
+      } catch (error) {
+          console.error('Failed to get user ID:', error);
+          return null;
+      }
+    },
     async submitPaper() {
       const formData = new FormData();
+      formData.append('authorId', await this.getCurrentUser());
       formData.append('title', this.title);
       formData.append('description', this.description);
       formData.append('field', this.field);
