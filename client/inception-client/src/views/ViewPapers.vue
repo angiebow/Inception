@@ -18,7 +18,7 @@
     </div>
     <div v-else>
       <ul>
-        <li v-for="paper in filteredPapers" :key="paper._id" class="mb-6 p-4 bg-gray-800 rounded-lg" ref="paperItems">
+        <li v-for="paper in paginatedPapers" :key="paper._id" class="mb-6 p-4 bg-gray-800 rounded-lg" ref="paperItems">
           <h3 class="text-2xl font-semibold text-nebula" v-html="highlightText(paper.title)"></h3>
           <p class="text-sm text-gray-400">Submitted on {{ new Date(paper.createdAt).toLocaleDateString() }}</p>
           <p class="mt-2" v-html="highlightText(paper.description)"></p>
@@ -52,6 +52,17 @@
           </div>
         </li>
       </ul>
+
+      <!-- Pagination Controls -->
+      <div class="flex justify-between items-center mt-4">
+        <button @click="prevPage" :disabled="currentPage === 1" class="px-4 py-2 bg-nebula text-white-900 font-semibold rounded hover:bg-indigo-700 transition duration-300 transform hover:scale-105">
+          Previous
+        </button>
+        <span class="text-white-900">Page {{ currentPage }} of {{ totalPages }}</span>
+        <button @click="nextPage" :disabled="currentPage === totalPages" class="px-4 py-2 bg-nebula text-white-900 font-semibold rounded hover:bg-indigo-700 transition duration-300 transform hover:scale-105">
+          Next
+        </button>
+      </div>
     </div>
     <p v-if="error" class="mt-4 text-red-500">{{ error }}</p>
   </div>
@@ -67,7 +78,9 @@ export default {
       error: null,
       newComment: {},
       currentUserId: '',
-      searchTerm: '', 
+      searchTerm: '',
+      currentPage: 1,
+      itemsPerPage: 10,
     };
   },
   computed: {
@@ -81,8 +94,26 @@ export default {
         paper.description.toLowerCase().includes(lowerSearchTerm)
       );
     },
+    totalPages() {
+      return Math.ceil(this.filteredPapers.length / this.itemsPerPage);
+    },
+    paginatedPapers() {
+      const start = (this.currentPage - 1) * this.itemsPerPage;
+      const end = start + this.itemsPerPage;
+      return this.filteredPapers.slice(start, end);
+    },
   },
   methods: {
+    nextPage() {
+      if (this.currentPage < this.totalPages) {
+        this.currentPage += 1;
+      }
+    },
+    prevPage() {
+      if (this.currentPage > 1) {
+        this.currentPage -= 1;
+      }
+    },
     async addToFavorites(paperId) {
       const token = localStorage.getItem('token');
       if (!token) {
