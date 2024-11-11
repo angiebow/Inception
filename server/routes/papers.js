@@ -15,10 +15,11 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 router.post('/upload', upload.single('file'), async (req, res) => {
-  const { title, description, field, yearOfPublishing, institution, citationRate } = req.body;
+  const { authorId, title, description, field, yearOfPublishing, institution, citationRate } = req.body;
 
   try {
     const newPaper = new Paper({
+      authorId,
       title,
       description,
       field,

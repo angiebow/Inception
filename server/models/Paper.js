@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const paperSchema = new mongoose.Schema({
+  authorId : { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   title: { type: String, required: true },
   description: { type: String },
   field: { type: String },

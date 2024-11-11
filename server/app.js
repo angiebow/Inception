@@ -19,12 +19,14 @@ const userRoutes = require('./routes/user');
 const researchRoutes = require('./routes/research');
 const paperRoutes = require('./routes/papers'); 
 const commentRoutes = require('./routes/comments');
+const notificationRoutes = require('./routes/notifications');
 const favoriteRoutes = require('./routes/favorites'); 
 
 app.use('/api/users', userRoutes);
 app.use('/api/research', researchRoutes);
 app.use('/api/papers', paperRoutes); 
 app.use('/api/comments', commentRoutes);
+app.use('/api/notifications', notificationRoutes);
 app.use('/api/favorites', favoriteRoutes); 
 
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
