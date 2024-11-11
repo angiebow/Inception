@@ -54,7 +54,7 @@ export default {
         // Clear any previous error
         this.error = null;
         // Redirect to the home page or dashboard after successful login
-        this.$router.push('/');
+        this.$router.push('/home');
       } catch (error) {
         console.error('Login error:', error);
         // Improved error handling: check if there’s a server response

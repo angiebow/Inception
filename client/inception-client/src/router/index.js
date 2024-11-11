@@ -9,13 +9,13 @@ import Register from '@/views/Register.vue';
 import Dashboard from '@/views/Dashboard.vue';
 
 const routes = [
-  { path: '/', component: HomePage },
+  { path: '/', component: Dashboard },
   { path: '/view-paper', component: ViewPapers },
   { path: '/submit-paper', component: SubmitPapers },
   { path: '/favorites', component: FavoritePapers },
   { path: '/login', component: Login },
   { path: '/register', component: Register },
-  { path: '/dashboard', component: Dashboard },
+  { path: '/home', component: HomePage },
 ];
 
 const router = createRouter({

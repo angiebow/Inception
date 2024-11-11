@@ -1,13 +1,13 @@
 <template>
   <div id="app" class="min-h-screen font-sans text-white bg-space">
     <nav class="flex justify-center p-4 space-x-4 text-nebula">
-      <router-link to="/" class="hover:text-star">Home</router-link>
+      <router-link to="/home" class="hover:text-star">Home</router-link>
       <!-- <router-link to="/login" class="hover:text-star">Login</router-link>
       <router-link to="/register" class="hover:text-star">Register</router-link> -->
       <router-link v-if="!currentUserId" to="/login" class="hover:text-star">Login</router-link>
       <router-link v-if="!currentUserId" to="/register" class="hover:text-star">Register</router-link>
       
-      <router-link to="/dashboard" class="hover:text-star">Dashboard</router-link>
+      <router-link to="/" class="hover:text-star">Dashboard</router-link>
       <button @click="showNotifications = !showNotifications">Notifications</button>
       <div v-if="showNotifications" class="notification-dropdown">
         <ul>
