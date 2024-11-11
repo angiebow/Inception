@@ -1,9 +1,12 @@
 <template>
-  <div id="app" class="bg-space min-h-screen text-white font-sans">
-    <nav class="flex justify-center space-x-4 p-4 text-nebula">
+  <div id="app" class="min-h-screen font-sans text-white bg-space">
+    <nav class="flex justify-center p-4 space-x-4 text-nebula">
       <router-link to="/" class="hover:text-star">Home</router-link>
-      <router-link to="/login" class="hover:text-star">Login</router-link>
-      <router-link to="/register" class="hover:text-star">Register</router-link>
+      <!-- <router-link to="/login" class="hover:text-star">Login</router-link>
+      <router-link to="/register" class="hover:text-star">Register</router-link> -->
+      <router-link v-if="!currentUserId" to="/login" class="hover:text-star">Login</router-link>
+      <router-link v-if="!currentUserId" to="/register" class="hover:text-star">Register</router-link>
+      
       <router-link to="/dashboard" class="hover:text-star">Dashboard</router-link>
       <button @click="showNotifications = !showNotifications">Notifications</button>
       <div v-if="showNotifications" class="notification-dropdown">
@@ -34,62 +37,53 @@
 </style>
 
 <script>
-
 export default {
   data() {
     return {
-      currentUserId: null,
+      currentUserId: null, // Menyimpan userId setelah login
       notifications: [],
       showNotifications: false,
     };
   },
   async mounted() {
-    // Get the current user ID
-    await this.getCurrentUser();
-    //console.log(this.currentUserId);
+    await this.getCurrentUser();  // Memperoleh userId saat komponen dimuat
 
-    // Fetch notifications when the component is created
-    fetch(`http://localhost:5001/api/notifications/${this.currentUserId}`)
-      .then(response => response.json())
-      .then(data => {
-        this.notifications = data;
-      });
+    if (this.currentUserId) {
+      this.fetchNotifications();  // Mengambil notifikasi jika sudah login
+    }
   },
   methods: {
     async getCurrentUser() {
       const token = localStorage.getItem('token');
-      //console.log(token);
       if (!token) return null;
       try {
-          const response = await fetch('http://localhost:5001/api/users/me', {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-          if (response.ok) {
-            const data = await response.json();
-            //console.log(data.message + ' ' + data.userId);
-            this.currentUserId = data.userId;
-            return;
-          } else {
-              console.error('Failed to get user ID:', response.statusText);
-              return null;
-          }
+        const response = await fetch('http://localhost:5001/api/users/me', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          this.currentUserId = data.userId;
+        } else {
+          console.error('Failed to get user ID:', response.statusText);
+        }
       } catch (error) {
-          console.error('Failed to get user ID:', error);
-          return null;
+        console.error('Failed to get user ID:', error);
       }
     },
     async fetchNotifications() {
-      fetch(`http://localhost:5001/api/notifications/${this.currentUserId}`)
-        .then(response => response.json())
-        .then(data => {
-          this.notifications = data;
-        });
+      if (this.currentUserId) {
+        fetch(`http://localhost:5001/api/notifications/${this.currentUserId}`)
+          .then(response => response.json())
+          .then(data => {
+            this.notifications = data;
+          });
+      }
     },
     markAsRead(notificationId) {
       fetch(`http://localhost:5001/api/notifications/${notificationId}`, {
-        method: 'PUT'
+        method: 'PUT',
       })
         .then(response => response.json())
         .then(data => {
