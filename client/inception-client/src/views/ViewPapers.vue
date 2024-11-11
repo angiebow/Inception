@@ -31,11 +31,11 @@
           <button v-if="comments[paper._id] && showComments[paper._id]" @click="hideComments(paper._id)" class="ml-2 inline-block bg-nebula text-white-900 font-semibold rounded hover:bg-indigo-700 transition duration-300 transform hover:scale-105">
             Hide Comments
           </button>
-          <button @click="addToFavorites(paper._id)" class="mt-2 inline-block bg-nebula text-white-900 font-semibold rounded hover:bg-indigo-700 transition duration-300 transform hover:scale-105">
+          <button @click="addToFavorites(paper._id)" class="ml-2 inline-block bg-nebula text-white-900 font-semibold rounded hover:bg-indigo-700 transition duration-300 transform hover:scale-105">
             Add to Favorites
           </button>
           
-          <div v-if="comments[paper._id]">
+          <div v-if="comments[paper._id] && showComments[paper._id]" class="mt-4">
             <h3 class="text-2xl font-semibold text-nebula">Reviews</h3>
             <ul>
               <li v-for="comment in comments[paper._id]" :key="comment._id" class="mb-4 p-4 bg-gray-800 rounded-lg">
@@ -127,7 +127,7 @@ export default {
         if (response.ok) {
           const data = await response.json();
           this.currentUserId = data.userId;
-          this.currentUsername = data.username;
+          this.currentUsername = localStorage.getItem('username');
         } else {
           console.error('Failed to get user ID:', response.statusText);
         }
@@ -178,9 +178,9 @@ export default {
         });
         if (response.ok) {
           alert('Comment added successfully');
+          this.addNotification(authorId, paperTitle, this.newComment[inPaperId]);
           this.newComment[inPaperId] = '';
           this.viewComments(inPaperId);
-          this.addNotification(authorId, paperTitle, this.newComment[inPaperId]);
         } else {
           console.error('Error submitting comment:', response.statusText);
         }
@@ -190,7 +190,7 @@ export default {
     },
     async addNotification(authorId, paperTitle, comment) {
       try {
-        const response = await fetch('http://localhost:5001/api/notifications/upload', {
+        await fetch('http://localhost:5001/api/notifications/upload', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
